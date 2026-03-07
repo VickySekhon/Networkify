@@ -8,6 +8,13 @@ class Neo4jClient:
             auth=(settings.neo4j_user, settings.neo4j_password)
         )
 
+    def verify_connectivity(self):
+        try:
+            self.driver.verify_connectivity()
+            return True
+        except Exception as e:
+            return False
+
     def close(self):
         self.driver.close()
 
