@@ -1,6 +1,6 @@
 "use client"
 import { usePathname } from "next/navigation"
-import { Waypoints, Sparkles, MessageSquare, Copy, ChevronLeft, User, Building2, ArrowRight, CheckCircle2, Home, Users, Upload, Search, Settings, Loader2 } from "lucide-react"
+import { Waypoints, Sparkles, MessageSquare, Copy, ChevronLeft, User, Building2, ArrowRight, CheckCircle2, Home, Users, Upload, Search, Settings, Loader2, RefreshCw, Mail } from "lucide-react"
 import Link from "next/link"
 import Sidebar from "@/components/Sidebar"
 import { useState } from "react"
@@ -14,6 +14,7 @@ interface Contact {
   name: string
   title?: string
   company?: string
+  email?: string
   degree: number
   relevance_score: number
   is_recruiter?: boolean
@@ -37,6 +38,7 @@ export default function SearchPage() {
   const [aiMessage, setAiMessage] = useState("")
   const [messageLoading, setMessageLoading] = useState(false)
   const [copiedMessage, setCopiedMessage] = useState(false)
+  const [emailError, setEmailError] = useState(false)
 
   const search = async () => {
     if (!query) return
@@ -44,6 +46,7 @@ export default function SearchPage() {
     setResults(null)
     setSelectedContact(null)
     setAiMessage("")
+    setEmailError(false)
     const userId = localStorage.getItem("user_id") || ""
     const userName = localStorage.getItem("user_name") || ""
     try {
@@ -65,6 +68,7 @@ export default function SearchPage() {
     setSelectedContact(contact)
     setMessageLoading(true)
     setAiMessage("")
+    setEmailError(false)
     const userName = localStorage.getItem("user_name") || "Me"
     try {
       const res = await axios.post(`${API_URL}/api/messages/generate`, {
@@ -75,7 +79,7 @@ export default function SearchPage() {
       })
       setAiMessage(res.data.message)
     } catch (e) {
-      setAiMessage("Could not generate message. Please check that your OpenAI API key is configured.")
+      setAiMessage(`Error: ${(e as any)?.response?.data?.detail || "Could not generate message. Try again in a moment."}`)
     } finally {
       setMessageLoading(false)
     }
@@ -241,15 +245,38 @@ export default function SearchPage() {
                         </div>
                       ) : aiMessage ? (
                         <>
-                          <div className="bg-dark-bg/80 rounded-xl p-4 mb-4 border border-dark-glassBorder">
-                            <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{aiMessage}</p>
+                          <textarea
+                            value={aiMessage}
+                            onChange={e => setAiMessage(e.target.value)}
+                            rows={7}
+                            className="w-full bg-dark-bg/80 rounded-xl p-4 mb-4 border border-dark-glassBorder text-sm text-zinc-300 leading-relaxed focus:outline-none focus:border-brand-500 resize-none transition-colors"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleCopy}
+                              className={`flex-1 text-sm py-2.5 rounded-xl font-medium transition-all inline-flex items-center justify-center gap-2 ${copiedMessage ? "bg-accent-emerald text-white" : "bg-brand-600 hover:bg-brand-500 text-white"}`}
+                            >
+                              {copiedMessage ? (<><CheckCircle2 className="w-4 h-4" />Copied!</>) : (<><Copy className="w-4 h-4" />Copy</>)}
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (selectedContact?.email) {
+                                  window.location.href = `mailto:${selectedContact.email}?subject=${encodeURIComponent("Quick Coffee Chat?")}&body=${encodeURIComponent(aiMessage)}`
+                                  setEmailError(false)
+                                } else {
+                                  setEmailError(true)
+                                }
+                              }}
+                              className="border border-dark-glassBorder hover:border-zinc-500 text-zinc-400 hover:text-white text-sm px-4 py-2.5 rounded-xl font-medium transition-all inline-flex items-center justify-center gap-2"
+                            >
+                              <Mail className="w-4 h-4" />Send Email
+                            </button>
                           </div>
-                          <button
-                            onClick={handleCopy}
-                            className={`w-full text-sm py-2.5 rounded-xl font-medium transition-all inline-flex items-center justify-center gap-2 ${copiedMessage ? "bg-accent-emerald text-white" : "bg-brand-600 hover:bg-brand-500 text-white"}`}
-                          >
-                            {copiedMessage ? (<><CheckCircle2 className="w-4 h-4" />Copied!</>) : (<><Copy className="w-4 h-4" />Copy</>)}
-                          </button>
+                          {emailError && (
+                            <p className="mt-2 text-xs text-accent-rose text-center">
+                              Email could not be found, copy this message to send directly.
+                            </p>
+                          )}
                         </>
                       ) : (
                         <button onClick={() => generateMessage(selectedContact)} className="w-full bg-brand-600 hover:bg-brand-500 text-white text-sm py-3 rounded-xl font-medium transition-all inline-flex items-center justify-center gap-2">
@@ -260,7 +287,7 @@ export default function SearchPage() {
                   ) : (
                     <p className="text-sm text-zinc-500 text-center py-8">Search a company and click &quot;Draft Message&quot; to generate an AI outreach message.</p>
                   )}
-                  <p className="text-xs text-zinc-500 text-center mt-3">Powered by OpenAI</p>
+                  <p className="text-xs text-zinc-500 text-center mt-3">Powered by Gemini</p>
                 </div>
               </div>
             </div>
