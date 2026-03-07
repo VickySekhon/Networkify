@@ -24,7 +24,7 @@ export default function GraphPage() {
   }, [])
 
   return (
-    <div className="flex min-h-screen bg-dark-bg">
+    <div className="flex h-screen bg-dark-bg overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 p-6 flex flex-col">

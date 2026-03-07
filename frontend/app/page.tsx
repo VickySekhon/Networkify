@@ -42,7 +42,7 @@ export default function Home() {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-50 px-8 py-6">
+      <nav className="sticky top-0 z-50 px-8 py-6 bg-[#0a0a12]/80 backdrop-blur-md border-b border-zinc-800/50 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="text-xs tracking-[0.2em] text-zinc-500 uppercase">
             Network Intelligence

@@ -134,7 +134,7 @@ export default function Dashboard() {
   const activityDays = [3, 4, 5, 10, 11, 12, 17]
 
   return (
-    <div className="flex min-h-screen bg-dark-bg">
+    <div className="flex h-screen bg-dark-bg overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 p-6 overflow-auto">

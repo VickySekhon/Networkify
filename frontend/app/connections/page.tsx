@@ -62,41 +62,43 @@ export default function ConnectionsPage() {
   })
 
   return (
-    <div className="flex min-h-screen bg-dark-bg">
+    <div className="flex h-screen bg-dark-bg overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 p-6 overflow-auto">
         <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Connections</h1>
-              <p className="text-zinc-400">{loading ? "Loading..." : `${connections.length} people in your network`}</p>
-            </div>
-
-            <div className="flex gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input
-                  type="text"
-                  placeholder="Search connections..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-dark-surface border border-dark-glassBorder rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 w-64 focus:outline-none focus:border-brand-500 transition-colors"
-                />
+          <div className="sticky top-0 z-30 bg-dark-bg/95 backdrop-blur-sm -mx-6 px-6 pt-2 pb-6 border-b border-dark-glassBorder mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Connections</h1>
+                <p className="text-zinc-400">{loading ? "Loading..." : `${connections.length} people in your network`}</p>
               </div>
-              
-              <div className="relative">
-                <select
-                  value={filterCompany || ""}
-                  onChange={(e) => setFilterCompany(e.target.value || null)}
-                  className="appearance-none bg-dark-surface border border-dark-glassBorder rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors cursor-pointer"
-                >
-                  <option value="">All Companies</option>
-                  {companies.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-                <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+
+              <div className="flex gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <input
+                    type="text"
+                    placeholder="Search connections..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-dark-surface border border-dark-glassBorder rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 w-64 focus:outline-none focus:border-brand-500 transition-colors"
+                  />
+                </div>
+                
+                <div className="relative">
+                  <select
+                    value={filterCompany || ""}
+                    onChange={(e) => setFilterCompany(e.target.value || null)}
+                    className="appearance-none bg-dark-surface border border-dark-glassBorder rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors cursor-pointer"
+                  >
+                    <option value="">All Companies</option>
+                    {companies.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                </div>
               </div>
             </div>
           </div>

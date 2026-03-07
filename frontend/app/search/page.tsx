@@ -94,33 +94,35 @@ export default function SearchPage() {
   const bestContact = results?.top_connections?.[0] || null
 
   return (
-    <div className="flex min-h-screen bg-dark-bg">
+    <div className="flex h-screen bg-dark-bg overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 p-6 overflow-auto">
         <div className="max-w-5xl mx-auto animate-fade-in">
-          <div className="mb-8">
+          <div className="sticky top-0 z-30 bg-dark-bg/95 backdrop-blur-sm -mx-6 px-6 pt-2 pb-6 border-b border-dark-glassBorder mb-8">
             <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-white transition-colors mb-4">
               <ChevronLeft className="w-4 h-4" />
               Back to Dashboard
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Find Your Path</h1>
-              <p className="text-zinc-400">Search a company to discover your warmest connections.</p>
-            </div>
-          </div>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Find Your Path</h1>
+                <p className="text-zinc-400">Search a company to discover your warmest connections.</p>
+              </div>
 
-          <div className="flex gap-3 mb-8">
-            <input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && search()}
-              placeholder="e.g. Google, Shopify, OpenAI..."
-              className="flex-1 bg-dark-surface border border-dark-glassBorder rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition-colors"
-            />
-            <button onClick={search} disabled={loading || !query} className="btn-primary px-6 py-3 disabled:opacity-40">
-              {loading ? (<><Loader2 className="w-5 h-5 animate-spin" />Searching...</>) : (<><Search className="w-5 h-5" />Search</>)}
-            </button>
+              <div className="flex gap-3 w-full md:w-auto md:min-w-[400px]">
+                <input
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && search()}
+                  placeholder="e.g. Google, Shopify, OpenAI..."
+                  className="flex-1 bg-dark-surface border border-dark-glassBorder rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition-colors"
+                />
+                <button onClick={search} disabled={loading || !query} className="btn-primary px-6 py-3 disabled:opacity-40">
+                  {loading ? (<><Loader2 className="w-5 h-5 animate-spin" />Searching...</>) : (<><Search className="w-5 h-5" />Search</>)}
+                </button>
+              </div>
+            </div>
           </div>
 
           {results && (

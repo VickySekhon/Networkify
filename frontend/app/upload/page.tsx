@@ -59,7 +59,7 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-bg">
+    <div className="flex h-screen bg-dark-bg overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 flex items-center justify-center p-6">
