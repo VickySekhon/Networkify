@@ -65,7 +65,7 @@ export default function Home() {
           </div>
 
           <Link 
-            href="/upload" 
+            href="/login" 
             className="px-5 py-2 rounded-full border border-zinc-700 text-sm text-white hover:bg-white/5 transition-all flex items-center gap-2"
           >
             Launch App
@@ -157,7 +157,7 @@ export default function Home() {
           </div>
           
           <Link 
-            href="/upload" 
+            href="/login" 
             className="px-5 py-2.5 rounded-full bg-[#d4ff00] text-black text-sm font-medium hover:bg-[#e5ff4d] transition-all flex items-center gap-2"
           >
             <Zap className="w-4 h-4" />

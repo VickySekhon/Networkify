@@ -109,7 +109,14 @@ pip-wheel-metadata/
 # ==============================
 # Docker overrides
 # ==============================
-docker-compose.override.yml
+.AppleDouble
+.LSOverride
 
-# Connections.csv
-backend/data
+# ==============================
+# Temporary Files
+# ==============================
+*.tmp
+*.temp
+
+/frontend/.next
+/backend/data

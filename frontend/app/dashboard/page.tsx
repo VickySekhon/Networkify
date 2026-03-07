@@ -7,6 +7,7 @@ import {
   Waypoints, Home, Users, Upload, Settings, Search,
   ArrowUpRight, Zap, Droplets, ChevronLeft, ChevronRight
 } from "lucide-react"
+import Sidebar from "@/components/Sidebar"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
@@ -81,15 +82,8 @@ function WeeklyBar({ day, height, isActive }: WeeklyBarProps) {
   )
 }
 
-const navItems = [
-  { icon: Home, href: "/dashboard", label: "Dashboard" },
-  { icon: Users, href: "/connections", label: "Connections" },
-  { icon: Upload, href: "/upload", label: "Upload" },
-  { icon: Search, href: "/search", label: "Search" },
-]
 
 export default function Dashboard() {
-  const pathname = usePathname()
   const [currentMonth] = useState(new Date())
   const [stats, setStats] = useState({ connections: 0, companies: 0, recruiters: 0, top_companies: [] as any[] })
   const [loading, setLoading] = useState(true)
@@ -140,38 +134,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-dark-bg">
-      <aside className="w-20 bg-dark-surface border-r border-dark-glassBorder flex flex-col items-center py-6 gap-2">
-        <Link href="/" className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-cyan flex items-center justify-center mb-8 shadow-glow">
-          <Waypoints className="w-6 h-6 text-white" />
-        </Link>
-
-        <nav className="flex-1 flex flex-col gap-2">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                  isActive 
-                    ? "bg-brand-500/20 text-brand-400" 
-                    : "text-zinc-500 hover:text-white hover:bg-dark-elevated"
-                }`}
-                title={item.label}
-              >
-                <item.icon className="w-5 h-5" />
-              </Link>
-            )
-          })}
-        </nav>
-
-        <div className="flex flex-col gap-2">
-          <button className="w-12 h-12 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-dark-elevated transition-all">
-            <Settings className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-amber to-accent-rose" />
-        </div>
-      </aside>
+      <Sidebar />
 
       <main className="flex-1 p-6 overflow-auto">
         <div className="max-w-7xl mx-auto grid grid-cols-12 gap-4 auto-rows-min">
