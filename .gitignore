@@ -3,7 +3,24 @@
 # ==============================
 .env
 .env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 *.env
+
+# ==============================
+# Dependencies
+# ==============================
+node_modules/
+
+# ==============================
+# Next.js build output
+# ==============================
+.next/
+out/
+build/
+dist/
 
 # ==============================
 # IDE / Editor
@@ -20,19 +37,37 @@
 *.code-workspace
 
 # ==============================
-# Node.js
+# Logs
 # ==============================
-node_modules/
+logs/
+*.log
+*.out
+*.err
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 
 # ==============================
-# Python
+# OS Files
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+.AppleDouble
+.LSOverride
+
+# ==============================
+# Build / Cache / Temp
+# ==============================
+tmp/
+temp/
+.cache/
+coverage/
+.nyc_output/
+
+# ==============================
+# Python (if any scripts exist)
 # ==============================
 __pycache__/
 *.py[cod]
@@ -41,8 +76,6 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
-dist/
-build/
 .eggs/
 venv/
 .venv/
@@ -52,42 +85,11 @@ pip-wheel-metadata/
 .python-version
 
 # ==============================
-# Logs
+# Database
 # ==============================
-logs/
-*.log
-*.out
-*.err
-
-# ==============================
-# OS Files
-# ==============================
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ==============================
-# Build / Output
-# ==============================
-dist/
-build/
-out/
-tmp/
-temp/
-.cache/
-coverage/
-
-# ==============================
-# Testing
-# ==============================
-.nyc_output/
-coverage/
-
-# ==============================
-# Docker
-# ==============================
-.dockerignore
-docker-compose.override.yml
+*.sqlite
+*.sqlite3
+*.db
 
 # ==============================
 # Misc
@@ -96,13 +98,8 @@ docker-compose.override.yml
 *.seed
 *.pid.lock
 *.tgz
-
-# ==============================
-# Database
-# ==============================
-*.sqlite
-*.sqlite3
-*.db
+*.tmp
+*.temp
 
 # ==============================
 # TypeScript
@@ -110,7 +107,7 @@ docker-compose.override.yml
 *.tsbuildinfo
 
 # ==============================
-# Mac
+# Docker overrides
 # ==============================
 .AppleDouble
 .LSOverride
