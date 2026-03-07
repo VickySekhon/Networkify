@@ -21,15 +21,6 @@ export default function Home() {
         </div>
 
 
-        {/* Video placeholder - replace with your 3D graph video */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {/*
-            To add your video:
-            <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-60">
-              <source src="/your-video.mp4" type="video/mp4" />
-            </video>
-          */}
-        </div>
 
 
         {/* Particle dots */}
