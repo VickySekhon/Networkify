@@ -1,20 +1,25 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import axios from "axios"
 import { 
   Waypoints, Home, Users, Upload, Settings, Search,
-  Building2, ArrowUpRight, Filter, SortAsc, ChevronRight
+  Building2, ArrowUpRight, Filter, SortAsc, ChevronRight, Loader2
 } from "lucide-react"
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 interface Connection {
   id: string
   name: string
-  role: string
+  title: string
   company: string
-  connectedDate: string
-  degree: "1st" | "2nd"
-  matchScore: number
+  connected_on: string
+  degree: string
+  is_recruiter: boolean
+  email?: string
+  profile_url?: string
 }
 
 const navItems = [
@@ -28,22 +33,36 @@ export default function ConnectionsPage() {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
   const [filterCompany, setFilterCompany] = useState<string | null>(null)
+  const [connections, setConnections] = useState<Connection[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const connections: Connection[] = [
-    { id: "1", name: "Sarah Jenkins", role: "Senior Software Engineer", company: "Google", connectedDate: "2024-01-15", degree: "1st", matchScore: 98 },
-    { id: "2", name: "David Chen", role: "Engineering Manager", company: "Google", connectedDate: "2023-11-20", degree: "1st", matchScore: 85 },
-    { id: "3", name: "Priya Patel", role: "Technical Recruiter", company: "Microsoft", connectedDate: "2024-02-08", degree: "1st", matchScore: 72 },
-    { id: "4", name: "James Wilson", role: "Product Manager", company: "Stripe", connectedDate: "2023-09-12", degree: "1st", matchScore: 68 },
-    { id: "5", name: "Emily Zhang", role: "Data Scientist", company: "Meta", connectedDate: "2024-01-03", degree: "2nd", matchScore: 45 },
-    { id: "6", name: "Michael Brown", role: "Frontend Developer", company: "Amazon", connectedDate: "2023-12-18", degree: "1st", matchScore: 82 },
-  ]
+  useEffect(() => {
+    const fetchConnections = async () => {
+      const userId = localStorage.getItem("user_id") || ""
+      if (!userId) {
+        setLoading(false)
+        return
+      }
+      try {
+        const res = await axios.get(`${API_URL}/api/graph/connections`, {
+          params: { user_id: userId }
+        })
+        setConnections(res.data.connections || [])
+      } catch (e) {
+        console.error("Failed to fetch connections:", e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchConnections()
+  }, [])
 
-  const companies = [...new Set(connections.map(c => c.company))]
+  const companies = Array.from(new Set(connections.map(c => c.company).filter(Boolean)))
 
   const filteredConnections = connections.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           c.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          c.role.toLowerCase().includes(searchQuery.toLowerCase())
+                          (c.title || "").toLowerCase().includes(searchQuery.toLowerCase())
     const matchesFilter = !filterCompany || c.company === filterCompany
     return matchesSearch && matchesFilter
   })
@@ -88,7 +107,7 @@ export default function ConnectionsPage() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Connections</h1>
-              <p className="text-zinc-400">{connections.length} people in your network</p>
+              <p className="text-zinc-400">{loading ? "Loading..." : `${connections.length} people in your network`}</p>
             </div>
 
             <div className="flex gap-3">
@@ -127,7 +146,7 @@ export default function ConnectionsPage() {
               </div>
               <div className="col-span-3">Company</div>
               <div className="col-span-2">Degree</div>
-              <div className="col-span-2">Match Score</div>
+              <div className="col-span-2">Role</div>
               <div className="col-span-1"></div>
             </div>
 
@@ -147,7 +166,7 @@ export default function ConnectionsPage() {
                         </div>
                         <div>
                           <p className="font-medium text-white">{connection.name}</p>
-                          <p className="text-sm text-zinc-500">{connection.role}</p>
+                          <p className="text-sm text-zinc-500">{connection.title}</p>
                         </div>
                       </div>
                     </div>
@@ -172,21 +191,15 @@ export default function ConnectionsPage() {
                     </div>
                     
                     <div className="col-span-2">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-dark-elevated rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${
-                              connection.matchScore >= 80 
-                                ? "bg-accent-emerald" 
-                                : connection.matchScore >= 60 
-                                  ? "bg-accent-amber"
-                                  : "bg-zinc-500"
-                            }`}
-                            style={{ width: `${connection.matchScore}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-zinc-400 w-10">{connection.matchScore}%</span>
-                      </div>
+                      <span className="text-sm text-zinc-400 truncate block">
+                        {connection.is_recruiter ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-accent-amber/10 text-accent-amber border border-accent-amber/20">
+                            Recruiter
+                          </span>
+                        ) : (
+                          connection.title ? connection.title.split(" ").slice(0, 3).join(" ") : "—"
+                        )}
+                      </span>
                     </div>
                     
                     <div className="col-span-1 flex justify-end">

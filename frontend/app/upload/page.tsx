@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
+import axios from "axios"
 import { Upload, FileText, ArrowRight, Shield, CheckCircle2, Loader2, AlertCircle, Waypoints, Home, Users, Search, Settings } from "lucide-react"
 
 const navItems = [
@@ -17,12 +18,29 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null)
   const [userName, setUserName] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [result, setResult] = useState<any>(null)
   const [dragActive, setDragActive] = useState(false)
 
   const handleUpload = async () => {
     if (!file || !userName) return
     setStatus("loading")
-    setTimeout(() => setStatus("done"), 2000)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/upload/csv?user_name=${encodeURIComponent(userName)}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      )
+      setResult(res.data)
+      setStatus("done")
+      localStorage.setItem("user_id", res.data.user_id)
+      localStorage.setItem("user_name", userName)
+    } catch (e) {
+      console.error(e)
+      setStatus("error")
+    }
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -100,12 +118,12 @@ export default function UploadPage() {
               </div>
               <h2 className="text-2xl font-semibold text-white mb-2">Network Graph Built!</h2>
               <p className="text-zinc-400 mb-8">
-                Your connections have been mapped and analyzed by AI.
+                {result ? result.message : "Your connections have been mapped and analyzed by AI."}
               </p>
               
               <div className="grid grid-cols-2 gap-4">
                 <button 
-                  onClick={() => router.push("/search?q=Google")} 
+                  onClick={() => router.push("/search")} 
                   className="btn-primary"
                 >
                   Search Company

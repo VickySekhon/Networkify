@@ -1,11 +1,14 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import axios from "axios"
 import { 
   Waypoints, Home, Users, Upload, Settings, Search,
   ArrowUpRight, Zap, Droplets, ChevronLeft, ChevronRight
 } from "lucide-react"
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 interface MetricBarProps {
   icon: React.ReactNode
@@ -88,6 +91,29 @@ const navItems = [
 export default function Dashboard() {
   const pathname = usePathname()
   const [currentMonth] = useState(new Date())
+  const [stats, setStats] = useState({ connections: 0, companies: 0, recruiters: 0, top_companies: [] as any[] })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const userId = localStorage.getItem("user_id") || ""
+      if (!userId) {
+        setLoading(false)
+        return
+      }
+      try {
+        const res = await axios.get(`${API_URL}/api/graph/stats`, {
+          params: { user_id: userId }
+        })
+        setStats(res.data)
+      } catch (e) {
+        console.error("Failed to fetch stats:", e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
   
   const weeklyData = [
     { day: "Sun", height: 40 },
@@ -100,9 +126,9 @@ export default function Dashboard() {
   ]
 
   const metrics = {
-    connections: { value: "0", target: "500", percentage: 0 },
-    companies: { value: "0", target: "100", percentage: 0 },
-    paths: { value: "0", target: "50", percentage: 0 },
+    connections: { value: String(stats.connections), target: "500", percentage: Math.min(100, Math.round((stats.connections / 500) * 100)) },
+    companies: { value: String(stats.companies), target: "100", percentage: Math.min(100, Math.round((stats.companies / 100) * 100)) },
+    paths: { value: String(stats.recruiters), target: "50", percentage: Math.min(100, Math.round((stats.recruiters / 50) * 100)) },
   }
 
   const calendarDays = Array.from({ length: 35 }, (_, i) => {
@@ -201,16 +227,16 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-dark-glassBorder">
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Active time</p>
-                <p className="text-lg font-semibold text-white">--</p>
+                <p className="text-xs text-zinc-500 mb-1">Connections</p>
+                <p className="text-lg font-semibold text-white">{loading ? "..." : stats.connections}</p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Paths found</p>
-                <p className="text-lg font-semibold text-white">--</p>
+                <p className="text-xs text-zinc-500 mb-1">Companies</p>
+                <p className="text-lg font-semibold text-white">{loading ? "..." : stats.companies}</p>
               </div>
               <div>
-                <p className="text-xs text-zinc-500 mb-1">Best day</p>
-                <p className="text-lg font-semibold text-white">--</p>
+                <p className="text-xs text-zinc-500 mb-1">Recruiters</p>
+                <p className="text-lg font-semibold text-white">{loading ? "..." : stats.recruiters}</p>
               </div>
             </div>
           </div>
@@ -313,8 +339,8 @@ export default function Dashboard() {
           <div className="col-span-6 lg:col-span-3 grid grid-cols-1 gap-4">
             <StatCard
               icon={<Zap className="w-5 h-5 text-accent-amber" />}
-              value="--"
-              label="Messages Sent"
+              value={loading ? "..." : String(stats.recruiters)}
+              label="Recruiters Found"
               color="bg-accent-amber/20"
             />
           </div>
@@ -322,8 +348,8 @@ export default function Dashboard() {
           <div className="col-span-6 lg:col-span-3 grid grid-cols-1 gap-4">
             <StatCard
               icon={<Droplets className="w-5 h-5 text-accent-cyan" />}
-              value="--"
-              label="Response Rate"
+              value={loading ? "..." : stats.top_companies.length > 0 ? stats.top_companies[0].name : "N/A"}
+              label="Top Company"
               color="bg-accent-cyan/20"
             />
           </div>
