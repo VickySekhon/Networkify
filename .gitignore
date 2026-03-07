@@ -120,3 +120,6 @@ docker-compose.override.yml
 # ==============================
 *.tmp
 *.temp
+
+/frontend/.next
+/backend/data
