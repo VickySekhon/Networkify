@@ -130,6 +130,7 @@ def get_graph_overview(user_id: str = Query(...)):
                         "id": cid,
                         "name": cname,
                         "type": "company",
+                        "logo": company.get("logo", ""),
                     })
                     seen_companies.add(cid)
 

@@ -6,7 +6,28 @@ CSV columns (LinkedIn export):
 """
 import pandas as pd
 import hashlib
+import re
 from db.neo4j_client import db
+from config import settings
+
+LOGO_DEV_TOKEN = settings.logo_dev_token
+
+
+def company_to_logo_url(company_name: str) -> str:
+    """Convert a company name to a logo.dev image URL.
+    Guesses the domain from the company name (e.g. 'Google' -> 'google.com')."""
+    if not company_name:
+        return ""
+    # Clean the name: remove Inc, Ltd, Corp, LLC, etc.
+    clean = re.sub(r'\b(inc|ltd|llc|corp|corporation|co|company|group|technologies|tech|software|solutions|labs|limited|plc)\b',
+                   '', company_name, flags=re.IGNORECASE)
+    clean = re.sub(r'[^a-zA-Z0-9\s]', '', clean).strip()
+    # Convert to domain-like slug
+    slug = clean.lower().replace(' ', '')
+    if not slug:
+        return ""
+    domain = f"{slug}.com"
+    return f"https://img.logo.dev/{domain}?token={LOGO_DEV_TOKEN}&size=64"
 
 def parse_csv(file_bytes: bytes) -> pd.DataFrame:
     import io
@@ -84,10 +105,12 @@ def build_graph(df: pd.DataFrame, user: dict) -> dict:
         stats["relationships"] += 1
 
         if company:
-            # Upsert Company
+            # Upsert Company with logo
+            logo_url = company_to_logo_url(company)
             db.run_write("""
                 MERGE (co:Company {name: $name})
-            """, name=company)
+                SET co.logo = $logo
+            """, name=company, logo=logo_url)
             stats["companies"] += 1
 
             # Relationship: connection → company

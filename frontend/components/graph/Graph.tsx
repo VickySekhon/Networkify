@@ -15,6 +15,7 @@ type GraphNode = {
   title?: string
   is_recruiter?: boolean
   initials?: string
+  logo?: string
   x?: number
   y?: number
 }
@@ -45,6 +46,21 @@ const NODE_SIZES: Record<string, number> = {
   user: 10,
   person: 5,
   company: 7,
+}
+
+// Image cache for company logos
+const logoCache = new Map<string, HTMLImageElement | null>()
+
+function loadLogo(url: string): HTMLImageElement | null {
+  if (!url) return null
+  if (logoCache.has(url)) return logoCache.get(url)!
+  logoCache.set(url, null)
+  const img = new Image()
+  img.crossOrigin = "anonymous"
+  img.onload = () => logoCache.set(url, img)
+  img.onerror = () => logoCache.set(url, null)
+  img.src = url
+  return null
 }
 
 export default function Graph({ width, height }: Props) {
@@ -105,6 +121,25 @@ export default function Graph({ width, height }: Props) {
     ctx.arc(node.x, node.y, r, 0, 2 * Math.PI)
     ctx.fillStyle = color
     ctx.fill()
+
+    // Company logo inside node
+    if (node.type === "company" && node.logo) {
+      const logo = loadLogo(node.logo)
+      if (logo) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(node.x, node.y, r - 1, 0, 2 * Math.PI)
+        ctx.clip()
+        ctx.drawImage(logo, node.x - (r - 1), node.y - (r - 1), (r - 1) * 2, (r - 1) * 2)
+        ctx.restore()
+        // Border around logo
+        ctx.beginPath()
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI)
+        ctx.strokeStyle = "#F59E0B"
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+    }
 
     // Initials inside node (for user and person nodes)
     if (node.type !== "company" && node.initials) {

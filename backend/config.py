@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     gemini_api_key: str = ""
     scrapfly_api_key: str = ""
+    logo_dev_token: str = ""
     auth0_domain: str
     auth0_client_id: str
     auth0_client_secret: str
