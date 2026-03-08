@@ -17,6 +17,7 @@ type GraphNode = {
   is_recruiter?: boolean
   initials?: string
   logo?: string
+  url?: string
   profile_url?: string
   connected_on?: string
   is_source?: boolean
@@ -244,7 +245,12 @@ export default function Graph({ width, height, initialZoom, default3D = false, a
       fgRef.current.zoom(2.5, 600)
     }
     
-    if (node.type === "person" || node.type === "user") {
+    if (node.type === "company") {
+      if (node.url) {
+        window.open(node.url, "_blank", "noopener,noreferrer")
+      }
+      setSelectedNode(null)
+    } else if (node.type === "person" || node.type === "user") {
       setSelectedNode(node as GraphNode)
     } else {
       setSelectedNode(null)
@@ -275,6 +281,13 @@ export default function Graph({ width, height, initialZoom, default3D = false, a
       }
     }
   }, [initialZoom, hasInitialZoomed, data, is3D])
+
+  // Pin node in place after dragging so the simulation doesn't pull it back
+  const handleNodeDragEnd = useCallback((node: any) => {
+    node.fx = node.x
+    node.fy = node.y
+    if (is3D) node.fz = node.z
+  }, [is3D])
 
   const paintNode = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const r = NODE_SIZES[node.type] || 5
@@ -668,11 +681,15 @@ export default function Graph({ width, height, initialZoom, default3D = false, a
           height={height}
           backgroundColor="rgba(10,10,18,0)"
           nodeThreeObject={create3DNode}
-          nodeLabel={(node: any) => `${node.name}${node.title ? ` - ${node.title}` : ''}`}
+          nodeLabel={(node: any) => {
+            const label = `${node.name}${node.title ? ` - ${node.title}` : ''}`
+            return node.type === "company" && node.url ? `${label} (click to visit)` : label
+          }}
           linkColor={(link: any) => link.label === "KNOWS" ? "rgba(139,92,246,0.4)" : "rgba(245,158,11,0.4)"}
           linkWidth={1}
           linkOpacity={0.6}
           onNodeClick={handleNodeClick}
+          onNodeDragEnd={handleNodeDragEnd}
           onBackgroundClick={() => setSelectedNode(null)}
           onEngineStop={handleEngineStop}
           cooldownTicks={100}
@@ -699,6 +716,7 @@ export default function Graph({ width, height, initialZoom, default3D = false, a
           linkDirectionalArrowLength={4}
           linkDirectionalArrowRelPos={0.9}
           onNodeClick={handleNodeClick}
+          onNodeDragEnd={handleNodeDragEnd}
           onBackgroundClick={() => setSelectedNode(null)}
           onEngineStop={handleEngineStop}
           cooldownTicks={100}

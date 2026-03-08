@@ -7,8 +7,15 @@ CSV columns (LinkedIn export):
 import pandas as pd
 import hashlib
 import re
+import logging
+import requests
 from db.neo4j_client import db
 from config import settings
+
+logger = logging.getLogger(__name__)
+
+# In-process cache for company domain lookups (survives across requests, cleared on restart)
+_company_url_cache: dict[str, str] = {}
 
 LOGO_DEV_TOKEN = settings.logo_dev_token
 
@@ -31,6 +38,32 @@ def company_to_logo_url(company_name: str) -> str:
     url = f"https://img.logo.dev/{domain}?token={LOGO_DEV_TOKEN}&size=64"
     return url
 
+def company_to_url(company_name: str) -> str:
+    """Find the correct url of a company based on its name via Clearbit Autocomplete.
+    Results are cached in-process to avoid repeat HTTP calls for the same company."""
+    if not company_name:
+        return ""
+
+    # Check in-process cache first
+    if company_name in _company_url_cache:
+        return _company_url_cache[company_name]
+    
+    REQUEST_URL = f"https://autocomplete.clearbit.com/v1/companies/suggest?query={company_name}"
+    try:
+        response = requests.get(REQUEST_URL, timeout=5)
+        response.raise_for_status()
+        suggestions = response.json()
+        if suggestions:
+            domain = suggestions[0].get("domain", "")
+            url = f"https://{domain}" if domain else ""
+            _company_url_cache[company_name] = url
+            return url
+    except requests.RequestException as e:
+        logger.warning("Error fetching company URL for '%s': %s", company_name, e)
+    
+    _company_url_cache[company_name] = ""
+    return ""
+
 def parse_csv(file_bytes: bytes) -> pd.DataFrame:
     import io
     # LinkedIn CSVs have a 3-line header — skip it
@@ -38,7 +71,9 @@ def parse_csv(file_bytes: bytes) -> pd.DataFrame:
     df.columns = df.columns.str.strip()
     df = df.fillna("")
     
+    # User-defined fields
     df["Initials"] = df["First Name"].str[0] + df["Last Name"].str[0]
+    df["CompanyURL"] = df["Company"].apply(company_to_url)
     
     return df
 
@@ -142,6 +177,7 @@ def build_graph(df: pd.DataFrame, user: dict) -> dict:
 
         email = row.get("Email Address", "")
         company = row.get("Company", "").strip()
+        company_url = row.get("CompanyURL", "").strip()
         title = row.get("Position", "").strip()
         connected_on = row.get("Connected On", "")
         profile_url = row.get("URL", "")
@@ -159,6 +195,7 @@ def build_graph(df: pd.DataFrame, user: dict) -> dict:
             "name": name,
             "email": email,
             "company": company,
+            "company_url": company_url,
             "title": title,
             "connected_on": connected_on,
             "profile_url": profile_url,
@@ -191,7 +228,8 @@ def build_graph(df: pd.DataFrame, user: dict) -> dict:
         
         FOREACH (_ IN CASE WHEN row.company <> "" THEN [1] ELSE [] END |
             MERGE (comp:Company {name: row.company})
-            SET comp.logo = row.logo_url
+            SET comp.logo = row.logo_url,
+                comp.url = row.company_url
             MERGE (c)-[:WORKS_AT]->(comp)
         )
     """

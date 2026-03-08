@@ -267,6 +267,7 @@ def get_graph_overview(current_user: dict = Depends(get_current_user)):
                         "name": cname,
                         "type": "company",
                         "logo": company.get("logo", ""),
+                        "url": company.get("url", ""),
                     }
                 )
                 seen_companies.add(cid)
