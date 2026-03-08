@@ -1,5 +1,4 @@
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/4c665863-fd9c-406a-bf2b-402052e44ca1" />
-
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/7379ec51-06a2-45ab-850c-8200fe75d1a6" />
 ## Inspiration
 The job search process for many looks like the following:
 
