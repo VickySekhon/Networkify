@@ -16,3 +16,4 @@ ORDER BY connections DESC LIMIT 20;
 // ── All recruiters in network ─────────────────────────────
 MATCH (:Person {id: $user_id})-[:KNOWS]->(p:Person)
 WHERE p.is_recruiter = true RETURN p ORDER BY p.company;
+
